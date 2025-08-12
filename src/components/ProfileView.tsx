@@ -1,118 +1,195 @@
 import React from 'react';
-import { motion } from 'framer-motion';
-import { User, Trophy, Coins, Calendar, Target, TrendingUp, Award, Star } from 'lucide-react';
+import { User, Award, Target, TrendingUp, Calendar, Coins, Star, Trophy } from 'lucide-react';
 import { useStore } from '../store/useStore';
+import { motion } from 'framer-motion';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
 
 export const ProfileView: React.FC = () => {
-  const { userProfile, moodHistory } = useStore();
+  const { userProfile, tasks, dailyCheckIns } = useStore();
+  
+  const completedTasks = tasks.filter(t => t.completed).length;
+  const totalTasks = tasks.length;
+  const completionRate = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   const achievements = [
-    { id: '1', name: '7-Day Streak', icon: Calendar, unlocked: userProfile.currentStreak >= 7, description: 'Check in for 7 days straight' },
-    { id: '2', name: 'Mood Master', icon: Star, unlocked: moodHistory.length >= 10, description: 'Track your mood 10 times' },
-    { id: '3', name: 'Coin Collector', icon: Coins, unlocked: userProfile.coins >= 50, description: 'Collect 50 coins' },
-    { id: '4', name: 'Shop Explorer', icon: Trophy, unlocked: userProfile.purchasedItems.length >= 3, description: 'Purchase 3 items' },
-  ];
-
-  const stats = [
-    { label: 'Current Streak', value: userProfile.currentStreak, icon: TrendingUp },
-    { label: 'Total Check-ins', value: userProfile.totalCheckIns, icon: Calendar },
-    { label: 'Coins Earned', value: userProfile.coins, icon: Coins },
-    { label: 'Items Purchased', value: userProfile.purchasedItems.length, icon: Award },
+    { id: 1, name: 'First Steps', description: 'Complete your first task', icon: '🎯', unlocked: completedTasks > 0 },
+    { id: 2, name: 'Week Warrior', description: '7-day check-in streak', icon: '🔥', unlocked: userProfile.currentStreak >= 7 },
+    { id: 3, name: 'Task Master', description: 'Complete 10 tasks', icon: '⭐', unlocked: completedTasks >= 10 },
+    { id: 4, name: 'Coin Collector', description: 'Earn 50 coins', icon: '💰', unlocked: userProfile.coins >= 50 },
   ];
 
   return (
-    <div className="min-h-screen pb-20 p-6">
-      <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-8"
-        >
-          <div className="w-24 h-24 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <User size={48} className="text-white" />
-          </div>
-          <h1 className="text-3xl font-bold gradient-text mb-2">
-            {userProfile.name || 'Student'}
-          </h1>
-          <p className="text-slate-600">Level {Math.floor(userProfile.totalCheckIns / 7) + 1} Scholar</p>
-        </motion.div>
-
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          {stats.map((stat, index) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: index * 0.1 }}
-                className="glass-card p-4 text-center"
-              >
-                <Icon size={24} className="text-purple-600 mx-auto mb-2" />
-                <p className="text-2xl font-bold">{stat.value}</p>
-                <p className="text-sm text-slate-600">{stat.label}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        <div className="glass-card p-6">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Trophy className="text-yellow-500" />
-            Achievements
-          </h2>
-          <div className="space-y-3">
-            {achievements.map((achievement) => {
-              const Icon = achievement.icon;
-              return (
-                <div
-                  key={achievement.id}
-                  className={`flex items-center gap-4 p-3 rounded-lg transition-all ${
-                    achievement.unlocked
-                      ? 'bg-gradient-to-r from-purple-100 to-pink-100'
-                      : 'bg-slate-100 opacity-50'
-                  }`}
-                >
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                    achievement.unlocked
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600'
-                      : 'bg-slate-300'
-                  }`}>
-                    <Icon size={24} className="text-white" />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-bold">{achievement.name}</h3>
-                    <p className="text-sm text-slate-600">{achievement.description}</p>
-                  </div>
-                  {achievement.unlocked && (
-                    <Star className="text-yellow-500" fill="currentColor" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="glass-card p-6 mt-6"
-        >
-          <h2 className="text-xl font-bold mb-4">Motivation Level</h2>
-          <div className="relative h-4 bg-slate-200 rounded-full overflow-hidden">
-            <motion.div
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-600 to-pink-600"
-              initial={{ width: 0 }}
-              animate={{ width: `${userProfile.motivationLevel}%` }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-            />
-          </div>
-          <p className="text-center mt-2 text-sm text-slate-600">
-            {userProfile.motivationLevel}% Motivated
-          </p>
-        </motion.div>
+    <div className="min-h-screen pb-24 px-6 pt-8">
+      {/* Header */}
+      <div className="text-center mb-8" data-aos="fade-down">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-pink-600 to-purple-600 bg-clip-text text-transparent">
+          My Profile
+        </h1>
+        <p className="text-gray-600">Track your amazing progress! 🌟</p>
       </div>
+
+      {/* Profile Card */}
+      <motion.div 
+        className="glass-card p-6 mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        data-aos="zoom-in"
+      >
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+            <User size={40} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-gray-800">
+              {userProfile.name || 'Student'}
+            </h2>
+            <p className="text-gray-600">{userProfile.email || 'student@classroom.com'}</p>
+            <div className="flex items-center gap-2 mt-2">
+              <Coins className="text-yellow-500" size={16} />
+              <span className="font-bold text-gray-700">{userProfile.coins} Coins</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="sticky-note">
+            <div className="flex items-center gap-2">
+              <Trophy className="text-yellow-500" size={20} />
+              <div>
+                <p className="text-xs text-gray-600">Current Streak</p>
+                <p className="text-2xl font-bold text-gray-800">{userProfile.currentStreak} days</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="sticky-note" style={{ transform: 'rotate(2deg)' }}>
+            <div className="flex items-center gap-2">
+              <Star className="text-purple-500" size={20} />
+              <div>
+                <p className="text-xs text-gray-600">Total Check-ins</p>
+                <p className="text-2xl font-bold text-gray-800">{userProfile.totalCheckIns}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Progress Section */}
+      <motion.div 
+        className="glass-card p-6 mb-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        data-aos="fade-up"
+      >
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Target className="text-red-500" />
+          Your Progress
+        </h3>
+        
+        <div className="grid grid-cols-2 gap-6">
+          <div className="text-center">
+            <div className="w-32 h-32 mx-auto mb-2">
+              <CircularProgressbar
+                value={completionRate}
+                text={`${Math.round(completionRate)}%`}
+                styles={buildStyles({
+                  pathColor: `rgba(168, 85, 247, ${completionRate / 100})`,
+                  textColor: '#7C3AED',
+                  trailColor: '#E9D5FF',
+                })}
+              />
+            </div>
+            <p className="text-sm text-gray-600">Task Completion</p>
+          </div>
+          
+          <div className="text-center">
+            <div className="w-32 h-32 mx-auto mb-2">
+              <CircularProgressbar
+                value={userProfile.motivationLevel}
+                text={`${userProfile.motivationLevel}%`}
+                styles={buildStyles({
+                  pathColor: `rgba(236, 72, 153, ${userProfile.motivationLevel / 100})`,
+                  textColor: '#DB2777',
+                  trailColor: '#FCE7F3',
+                })}
+              />
+            </div>
+            <p className="text-sm text-gray-600">Motivation Level</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Achievements */}
+      <motion.div 
+        className="glass-card p-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        data-aos="fade-up"
+      >
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Award className="text-yellow-500" />
+          Achievements
+        </h3>
+        
+        <div className="grid grid-cols-2 gap-4">
+          {achievements.map((achievement) => (
+            <div
+              key={achievement.id}
+              className={`p-4 rounded-xl border-2 ${
+                achievement.unlocked 
+                  ? 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-300' 
+                  : 'bg-gray-50 border-gray-200 opacity-50'
+              }`}
+            >
+              <div className="text-2xl mb-2">{achievement.icon}</div>
+              <h4 className="font-bold text-sm text-gray-800">{achievement.name}</h4>
+              <p className="text-xs text-gray-600 mt-1">{achievement.description}</p>
+              {achievement.unlocked && (
+                <div className="mt-2 text-xs text-green-600 font-semibold">✓ Unlocked</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
+      {/* Recent Activity */}
+      <motion.div 
+        className="glass-card p-6 mt-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        data-aos="fade-up"
+      >
+        <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <Calendar className="text-blue-500" />
+          Recent Check-ins
+        </h3>
+        
+        {dailyCheckIns.length > 0 ? (
+          <div className="space-y-2">
+            {dailyCheckIns.slice(-5).reverse().map((checkIn, index) => (
+              <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-blue-200 flex items-center justify-center">
+                    <span className="text-xs font-bold">{checkIn.day}</span>
+                  </div>
+                  <span className="text-sm text-gray-700">{new Date(checkIn.date).toLocaleDateString()}</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Coins className="text-yellow-500" size={14} />
+                  <span className="text-sm font-bold text-gray-700">+{checkIn.coins}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-center text-gray-500 py-4">No check-ins yet. Start your streak today!</p>
+        )}
+      </motion.div>
     </div>
   );
 };

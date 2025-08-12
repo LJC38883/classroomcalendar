@@ -1,0 +1,58 @@
+@media (max-width: 768px) {
+  .calendar-title {
+    font-size: 2rem;
+  }
+  
+  .month-title {
+    font-size: 1.25rem;
+  }
+  
+  .calendar-grid {
+    gap: 4px;
+  }
+  
+  .weekday-header {
+    font-size: 0.75rem;
+    padding: 8px 0;
+  }
+  
+  .day-number {
+    font-size: 0.875rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .music-player {
+    width: calc(100vw - 40px);
+    right: 20px;
+  }
+  
+  .shop-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 0 10px;
+  }
+  
+  .nav-button {
+    min-width: 60px;
+    padding: 6px 8px;
+  }
+  
+  .nav-label {
+    font-size: 10px;
+  }
+  
+  .calendar-title {
+    font-size: 1.75rem;
+  }
+  
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+}

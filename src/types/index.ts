@@ -21,14 +21,13 @@ export interface Reflection {
 
 export interface Class {
   id: string;
-  title: string;
+  name: string;
+  day: string;
+  startTime: string;
+  endTime: string;
   location: string;
-  startTime: Date;
-  endTime: Date;
-  isImportant: boolean;
-  notes?: string;
   color: string;
-  reminderMinutes: number;
+  reminder: number;
 }
 
 export interface Holiday {
@@ -71,7 +70,7 @@ export interface UserProfile {
 
 export interface ChatMessage {
   id: string;
-  text: string;
+  content: string;
   sender: 'user' | 'coach' | 'ai';
   timestamp: Date;
   personality?: string;

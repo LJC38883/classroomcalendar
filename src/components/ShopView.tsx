@@ -43,17 +43,15 @@ export const ShopView: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 px-6 pt-8">
       {/* Header */}
-      <motion.div 
-        className="mb-6"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-4xl font-bold mb-2 gradient-text">Shop</h1>
+      <div className="mb-6" data-aos="fade-down">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          Classroom Shop
+        </h1>
         <div className="flex items-center gap-2">
           <Coins className="text-yellow-500" size={20} />
           <span className="text-lg font-bold">{userProfile.coins} Coins</span>
         </div>
-      </motion.div>
+      </div>
 
       {/* Categories */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
@@ -65,9 +63,11 @@ export const ShopView: React.FC = () => {
               onClick={() => setSelectedCategory(category.id as any)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap transition-all ${
                 selectedCategory === category.id
-                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white'
-                  : 'glass-card'
+                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg'
+                  : 'glass-card hover:scale-105'
               }`}
+              data-aos="fade-up"
+              data-aos-delay={categories.indexOf(category) * 100}
             >
               <Icon size={16} />
               <span className="text-sm font-medium">{category.label}</span>
@@ -77,7 +77,7 @@ export const ShopView: React.FC = () => {
       </div>
 
       {/* Items Grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <AnimatePresence mode="popLayout">
           {filteredItems.map((item, index) => {
             const isPurchased = userProfile.purchasedItems.includes(item.id);
@@ -91,26 +91,28 @@ export const ShopView: React.FC = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: index * 0.05 }}
-                className="glass-card p-4"
+                className="glass-card p-4 hover:shadow-xl transition-shadow"
+                data-aos="fade-up"
+                data-aos-delay={index * 50}
               >
                 {item.preview && (
                   <div className="aspect-video rounded-lg overflow-hidden mb-3">
                     <img 
                       src={item.preview} 
                       alt={item.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
                     />
                   </div>
                 )}
                 
                 {!item.preview && (
                   <div className="aspect-video rounded-lg bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center mb-3">
-                    <Sparkles className="text-purple-600" size={32} />
+                    <Sparkles className="text-purple-600 floating" size={32} />
                   </div>
                 )}
 
                 <h3 className="font-bold text-sm mb-1">{item.name}</h3>
-                <p className="text-xs text-slate-600 mb-3">{item.description}</p>
+                <p className="text-xs text-gray-600 mb-3">{item.description}</p>
                 
                 <button
                   onClick={() => handlePurchase(item.id)}
@@ -119,8 +121,8 @@ export const ShopView: React.FC = () => {
                     isPurchased
                       ? 'bg-green-100 text-green-600 cursor-not-allowed'
                       : canAfford
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg'
-                      : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:shadow-lg hover:scale-105'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   {isPurchased ? (
@@ -147,9 +149,9 @@ export const ShopView: React.FC = () => {
       </div>
 
       {filteredItems.length === 0 && (
-        <div className="text-center py-12">
-          <ShoppingBag className="mx-auto text-slate-300 mb-4" size={48} />
-          <p className="text-slate-600">No items in this category yet</p>
+        <div className="text-center py-12" data-aos="fade-up">
+          <ShoppingBag className="mx-auto text-gray-300 mb-4" size={48} />
+          <p className="text-gray-600">No items in this category yet</p>
         </div>
       )}
     </div>

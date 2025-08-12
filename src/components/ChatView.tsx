@@ -1,24 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Sparkles, Heart, Brain, Zap, Shield } from 'lucide-react';
+import { Send, Bot, User, Sparkles } from 'lucide-react';
 import { useStore } from '../store/useStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAIResponse } from '../utils/aiCoach';
 import toast from 'react-hot-toast';
 
-const coachPersonalities = [
-  { id: 'motivational', name: 'Motivator Max', icon: Zap, color: 'from-yellow-500 to-orange-500' },
-  { id: 'empathetic', name: 'Empathy Emma', icon: Heart, color: 'from-pink-500 to-rose-500' },
-  { id: 'analytical', name: 'Analyst Alex', icon: Brain, color: 'from-blue-500 to-indigo-500' },
-  { id: 'creative', name: 'Creative Casey', icon: Sparkles, color: 'from-purple-500 to-pink-500' },
-  { id: 'stoic', name: 'Stoic Sam', icon: Shield, color: 'from-gray-500 to-slate-600' },
-];
-
 export const ChatView: React.FC = () => {
-  const { chatMessages, addChatMessage, userProfile, updateUserProfile } = useStore();
-  const [input, setInput] = useState('');
+  const [message, setMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const { chatMessages, addChatMessage } = useStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [selectedCoach, setSelectedCoach] = useState(coachPersonalities[0]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -28,140 +18,148 @@ export const ChatView: React.FC = () => {
     scrollToBottom();
   }, [chatMessages]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
+  const handleSendMessage = async () => {
+    if (!message.trim()) return;
 
     const userMessage = {
       id: Date.now().toString(),
-      text: input,
+      content: message,
       sender: 'user' as const,
-      timestamp: new Date(),
-      personality: selectedCoach.id as any,
+      timestamp: new Date()
     };
 
     addChatMessage(userMessage);
-    setInput('');
+    setMessage('');
     setIsTyping(true);
 
+    // Simulate AI response
     setTimeout(() => {
-      const aiResponse = getAIResponse(input, selectedCoach.id as any, userProfile);
+      const responses = [
+        "Great question! Let me help you with that. 📚",
+        "You're doing amazing! Keep up the great work! 🌟",
+        "That's a smart approach! Have you considered trying this...? 🤔",
+        "I love your enthusiasm! Here's what I suggest... 💡",
+        "Excellent progress! Remember to take breaks too! 😊"
+      ];
+
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: aiResponse,
+        content: responses[Math.floor(Math.random() * responses.length)],
         sender: 'ai' as const,
-        timestamp: new Date(),
-        personality: selectedCoach.id as any,
+        timestamp: new Date()
       };
+
       addChatMessage(aiMessage);
       setIsTyping(false);
-      
-      updateUserProfile({ coins: userProfile.coins + 1 });
-      toast.success('+1 coin for engaging with your coach!');
+      toast.success('New message from your study buddy!', { icon: '💬' });
     }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-white pb-24">
-      <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white p-6">
-        <h1 className="text-3xl font-bold mb-4">AI Coach</h1>
-        
-        <div className="flex gap-2 overflow-x-auto pb-2">
-          {coachPersonalities.map((coach) => {
-            const Icon = coach.icon;
-            return (
-              <button
-                key={coach.id}
-                onClick={() => setSelectedCoach(coach)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all ${
-                  selectedCoach.id === coach.id
-                    ? 'bg-white/20 backdrop-blur-sm scale-105'
-                    : 'bg-white/10 hover:bg-white/15'
-                }`}
-              >
-                <Icon size={20} />
-                <span className="whitespace-nowrap text-sm font-medium">{coach.name}</span>
-              </button>
-            );
-          })}
+    <div className="min-h-screen pb-24 px-4 pt-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="chalkboard p-6 mb-6" data-aos="fade-down">
+          <h1 className="text-3xl font-bold text-white font-display flex items-center gap-3">
+            <Bot className="text-yellow-400" size={36} />
+            Study Buddy Chat
+          </h1>
+          <p className="text-gray-300 mt-2">Your AI assistant is here to help! 🎓</p>
         </div>
-      </div>
 
-      <div className="flex-1 p-4 space-y-4 max-h-[60vh] overflow-y-auto">
-        <AnimatePresence>
-          {chatMessages.map((message) => (
-            <motion.div
-              key={message.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`flex items-start gap-3 max-w-[80%] ${
-                message.sender === 'user' ? 'flex-row-reverse' : ''
-              }`}>
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                  message.sender === 'user' 
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500' 
-                    : `bg-gradient-to-r ${selectedCoach.color}`
-                }`}>
-                  {message.sender === 'user' ? (
-                    <User size={20} className="text-white" />
-                  ) : (
-                    <Bot size={20} className="text-white" />
+        {/* Chat Messages */}
+        <div className="glass-card p-4 mb-4 h-[calc(100vh-320px)] overflow-y-auto">
+          {chatMessages.length === 0 ? (
+            <div className="text-center py-12">
+              <Sparkles className="mx-auto text-purple-400 mb-4 floating" size={48} />
+              <h3 className="text-xl font-bold text-gray-700 mb-2">Start a conversation!</h3>
+              <p className="text-gray-500">Ask me anything about your studies, schedule, or just chat!</p>
+            </div>
+          ) : (
+            <AnimatePresence>
+              {chatMessages.map((msg, index) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.05 }}
+                  className={`flex gap-3 mb-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  {msg.sender === 'ai' && (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center flex-shrink-0">
+                      <Bot size={20} className="text-white" />
+                    </div>
                   )}
-                </div>
-                <div className={`rounded-2xl px-4 py-3 ${
-                  message.sender === 'user'
-                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white'
-                    : 'bg-white/80 backdrop-blur-sm border border-purple-100'
-                }`}>
-                  <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.sender === 'user' ? 'text-white/70' : 'text-gray-500'
-                  }`}>
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </p>
+                  
+                  <div className={`max-w-[70%] ${msg.sender === 'user' ? 'order-1' : 'order-2'}`}>
+                    <div className={`p-4 rounded-2xl ${
+                      msg.sender === 'user' 
+                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' 
+                        : 'notebook-paper'
+                    }`}>
+                      <p className={msg.sender === 'user' ? 'text-white' : 'text-gray-800'}>
+                        {msg.content}
+                      </p>
+                      <p className={`text-xs mt-2 ${msg.sender === 'user' ? 'text-blue-100' : 'text-gray-500'}`}>
+                        {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {msg.sender === 'user' && (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center flex-shrink-0 order-2">
+                      <User size={20} className="text-white" />
+                    </div>
+                  )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          )}
+          
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex gap-3 mb-4"
+            >
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
+                <Bot size={20} className="text-white" />
+              </div>
+              <div className="bg-gray-100 rounded-2xl p-4">
+                <div className="flex gap-2">
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                 </div>
               </div>
             </motion.div>
-          ))}
-        </AnimatePresence>
-        
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center gap-2 text-gray-500"
-          >
-            <div className="flex gap-1">
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
-              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
-            </div>
-            <span className="text-sm">{selectedCoach.name} is typing...</span>
-          </motion.div>
-        )}
-        
-        <div ref={messagesEndRef} />
-      </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
 
-      <div className="fixed bottom-20 left-0 right-0 p-4 bg-gradient-to-t from-white to-transparent">
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder={`Ask ${selectedCoach.name} anything...`}
-            className="flex-1 px-4 py-3 rounded-full bg-white/90 backdrop-blur-sm border border-purple-200 focus:outline-none focus:border-purple-400 transition-colors"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 text-white flex items-center justify-center hover:scale-105 transition-transform disabled:opacity-50 disabled:scale-100"
-          >
-            <Send size={20} />
-          </button>
+        {/* Input Area */}
+        <div className="glass-card p-4">
+          <div className="flex gap-3">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+              placeholder="Type your message..."
+              className="flex-1 px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-colors"
+            />
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSendMessage}
+              className="btn-primary px-6 flex items-center gap-2"
+            >
+              <Send size={20} />
+              Send
+            </motion.button>
+          </div>
         </div>
       </div>
     </div>

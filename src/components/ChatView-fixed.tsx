@@ -33,7 +33,7 @@ export const ChatView: React.FC = () => {
 
     const userMessage = {
       id: Date.now().toString(),
-      text: input,
+      content: input,
       sender: 'user' as const,
       timestamp: new Date(),
       personality: selectedCoach.id as any,
@@ -47,7 +47,7 @@ export const ChatView: React.FC = () => {
       const aiResponse = getAIResponse(input, selectedCoach.id as any, userProfile);
       const aiMessage = {
         id: (Date.now() + 1).toString(),
-        text: aiResponse,
+        content: aiResponse,
         sender: 'ai' as const,
         timestamp: new Date(),
         personality: selectedCoach.id as any,
@@ -127,7 +127,7 @@ export const ChatView: React.FC = () => {
                         ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
                         : 'bg-white'
                     }`}>
-                      <p className="text-sm">{message.text}</p>
+                      <p className="text-sm">{message.content}</p>
                     </div>
                     <p className="text-xs text-slate-500 mt-1 px-2">
                       {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
